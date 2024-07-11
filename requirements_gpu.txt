@@ -1,0 +1,16 @@
+scipy
+matplotlib
+numpy
+pyyaml
+seaborn
+pandas
+scikit-learn
+plotly
+keras
+flask_cors
+scikit-image
+flask
+chardet
+subprocess.run
+wandb
+tensorflow
