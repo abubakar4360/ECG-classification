@@ -1,3 +1,7 @@
-weights/
+ECG-AI.xlsx
+.git
+src/data_loader/data
+.idea/
 __pycache__
-decode_signal/__pycache__
+weights.h5
+wandb

@@ -5,13 +5,13 @@ from flask import Flask, request, jsonify, render_template
 from flask_cors import CORS
 from tensorflow.keras.models import load_model
 
-from decode_signal.main import get_signal
+from src.decode_signal.main import get_signal
 
-app = Flask(__name__)
+app = Flask(__name__, template_folder='src/templates')
 CORS(app)
 
 # Load configurations
-with open('config/config.yaml', 'r') as conf:
+with open('src/config/config.yaml', 'r') as conf:
     config = yaml.safe_load(conf)
 MODEL_PATH = config['MODEL_PATH']
 
@@ -61,7 +61,7 @@ def predict():
         model_files = {
             "model1": "model1.h5",
             "model2": "model2.keras",
-            "model3": "model3.h5"
+            "model3": "best.h5"
         }
 
         # Get the corresponding model file
@@ -106,4 +106,4 @@ def predict():
 
 
 if __name__ == '__main__':
-    app.run(debug=True, host='0.0.0.0', port=5005)
+    app.run(debug=True, host='0.0.0.0', port=5000)

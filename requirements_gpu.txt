@@ -13,4 +13,4 @@ flask
 chardet
 subprocess.run
 wandb
-tensorflow
+tensorflow==2.15.0

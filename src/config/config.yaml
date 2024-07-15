@@ -1,0 +1,47 @@
+# Download data configuration
+excel_file: /home/algoryc/Projects/wellnest-ecg-ai/ECG-AI.xlsx
+sheet_name: All
+sasToken: "?sp=r&st=2024-07-15T05:17:34Z&se=2024-07-20T13:17:34Z&spr=https&sv=2022-11-02&sr=c&sig=VWdXBzK9Gm2VhkIuZRDS%2FCz02bOydugFMAgjDezeFVM%3D"
+base_url: https://wellnestprodstorage.blob.core.windows.net/ecg-recordings/
+data_directory: data
+output_csv: ecg_data_1.csv
+start_index: 2          # It must start from index 2.
+end_index: 50
+
+# Inference configuration
+test_data_filepath: test_dataset.csv
+model_filepath: best_acc.keras
+
+# API configuration
+MODEL_PATH: checkpoints
+
+# Training configuration
+directory: src/data_loader/data
+diseases_to_select:
+  - "NO SIGNIFICANT ABNORMALITIES DETECTED"
+  - "TACHYCARDIA"
+  - "ST T CHANGES"
+  - "Q WAVE"
+  - "T WAVE CHANGE"
+  - "T INVERSION"
+  - "RECAPTURE"
+  - "ST ELEVATION"
+  - "RBBB"
+  - "LOW VOLTAGE"
+  - "SINUS RHYTHM"
+  - "WITHIN NORMAL LIMITS"
+  - "HEART RATE NORMAL"
+normal_diseases:
+  - "NO SIGNIFICANT ABNORMALITIES DETECTED"
+  - "SINUS RHYTHM"
+  - "WITHIN NORMAL LIMITS"
+  - "HEART RATE NORMAL"
+dataset_files:
+  - "ecg_data_1.csv"
+  - "ecg_data_2.csv"
+  - "ecg_data_3.csv"
+  - "ecg_data_4.csv"
+  - "ecg_data_5.csv"
+  - "ecg_data_6.csv"
+epochs: 2
+batch_size: 4

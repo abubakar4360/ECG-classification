@@ -19,26 +19,41 @@ The project involves the following key components:
 
 ## Repository Structure.
 ```
-wellnest-ecg-ai    
-    config
-        └── config.yaml                     # Configuration file
-    data_loader
-        └── download_azure_storage.py       # Script for downloading and processing ECG data
-    decode_signal
-        └── decode_signal.py                # Signal decoding script
-        └── main.py                
-    EDA
-        └── data_analysis.py                # Data analysis script
-    templates
-        └── index.html                      # HTML template for the web application
-    .gitignore                              # Git ignore file
-    README.md                               # Project README file
-    app.py                                  # Flask API
-    inference.py                            # Inference script for predictions
-    requirements.txt                        # List of dependencies
-    train.py                                # Script for training models
-
+wellnest-ecg-ai  
+    .github/
+        workflows/
+            └── python-package.yml                 # Github action worflows
+    checkpoints/
+        └── best.h5                                # Model weights  
+    src/
+        config/
+            └── config.yaml/                       # Configuration file
+        data_loader/
+            └── download_azure_storage.py          # Script for downloading and processing ECG data
+        decode_signal/
+            └── decode_signal.py                   # Signal decoding script
+            └── main.py                
+        EDA/
+            └── data_analysis.py                   # Data analysis script
+        templates/
+            └── index.html                         # HTML template for the web application
+    utils/
+        └── evaluate_model.py                      # Evaluate the trained model
+        └── load_data.py                           # Load the data for training
+        └── model_architecture.py                  # CNN + LSTM model
+        └── plot_metrics.py                        # Plot the trained model metrics
+        └── train_model.py                         # Train the model
+        
+    .gitignore                                     # Git ignore file
+    README.md                                      # Project README file
+    app.py                                         # Flask API
+    inference.py                                   # Inference script for predictions
+    requirements.txt                               # List of dependencies for CPU devices
+    requirements_gpu.txt                           # List of dependencies for GPU devices
+    train.py                                       # Script for training models
+    MANIFEST.in                                    # File specification for source distribution
 ```
+
 
 
 ## Installation Guide
@@ -77,16 +92,54 @@ Install the required dependencies using pip:
 ```bash
 pip install -r requirements_gpu.txt
 ```
+**Note:** Our models are trained on tensorflow version 2.15.0, so make sure you have a compatible tensorflow version to avoid conflicts.
 ### 5. Run Flask API
-Download all the model weights from the provided [link](https://drive.google.com/drive/folders/1nXUydCMQ3cdfmOkWx3EsyvtJEm-cM9yH?usp=sharing), place them in a directory of your choice, and update the ``config.yaml`` file with the path to this directory. Update the following line in ``config.yaml``:
-```angular2html
-MODEL_PATH: Path to directory where model weights are downloaded.
-```
+Download all the model weights from the provided [link](https://drive.google.com/drive/folders/1nXUydCMQ3cdfmOkWx3EsyvtJEm-cM9yH?usp=sharing), place them in a ``checkpoints`` directory.
+By default, our best model checkpoints are placed in the ``checkpoints`` directory.
 
-Now, you can start the API by running:
+Start the API by running:
 ```bash
 python app.py
 ```
+After the above command executed successfully, you will get a URL.
+
+**How to hit the endpoint?**
+
+To interact with the API endpoint, you can use the following Python code snippet:
+
+```bash
+    import requests
+    
+    # Define the endpoint URL
+    url = "YOUR_URL_HERE/predict"       # e.g: "http://127.0.0.1:5000/predict"
+    
+    # Define the data to be sent in the POST request
+    filename = 'fe1fc499-c00e-4c4c-8d0f-ecdb6f65f893'
+    sas_token = '?sp=r&st=2024-06-24T07:27:43Z&se=2024-07-05T15:27:43Z&spr=https&sv=2022-11-02&sr=c&sig=nu2ryh5dxKfU6fDoq20%2BPG%2BASbFYPE4lKhhc4xy39Qc%3D'
+    
+    body = {
+        'filename': filename,       # Replace with your actual filename
+        'token': sas_token,         # Replace with your actual token
+        'model': 'model1'           # Replace with your actual model choice (model1, model2, model3). Default is model3.
+    }
+    
+    # Send the POST request
+    response = requests.post(url, data=body)
+    
+    # Print the response from the server
+    print(response.json())
+```
+
+**Endpoint Instructions:**
+
+``Endpoint URL:`` Replace "YOUR_URL_HERE" with actual URL and ``/predict`` is the endpoint. 
+
+``filename:`` Replace 'fe1fc499-c00e-4c4c-8d0f-ecdb6f65f893' with the filename you want to send to the endpoint.
+
+``sas_token:`` Replace the sas_token string with your actual SAS token. Ensure it is valid and within the specified time frame.
+
+``model:`` Adjust the model parameter ('model1', 'model2', 'model3') based on your API's requirements. The default is 'model3'.
+
 
 ## Train the model
 
@@ -103,6 +156,8 @@ sheet_name: 'Sheet name within the Excel file, e.g., All'
 sasToken: 'Updated SAS token'
 
 base_url: 'No need to change this'
+
+data_directory: 'data'  # It will save your data in src/data_loader/data/
 
 output_csv: 'Output file path, e.g., data/ecg_data_1.csv'
 
@@ -137,7 +192,11 @@ Once the data is downloaded in the ``data`` directory, you can modify the traini
 ```bash
 directory: 'Directory where data is stored, e.g., data'
 
-dataset_files: 'List of file names from the data directory, e.g., ["ecg_data_1.csv", "ecg_data_2.csv"]'  # If you have only one file, just add that file to the list
+diseases_to_select: 'Select diseases needed to be trained'
+
+normal_diseases: 'Normal diseases in the data'
+
+dataset_files: 'List of file names from the data directory, e.g., ["ecg_data_1.csv", "ecg_data_2.csv"]'
 
 epochs: 'Number of epochs e.g, 20'
 
@@ -149,6 +208,31 @@ Now, run the training script:
 python train.py
 ```
 
-After the script is executed, the weights will be saved in the ``weights`` directory.
+After the script is executed, the weights will be saved in the ``checkpoints`` directory.
 
+## Docker Instructions
+
+### 1. Build Docker Image
+Run the following command to create the Docker image:
+```bash
+docker build -t wellnest-ecg-ai .
+```
+### 2. Run Docker Container
+After successfully building the image, run this command to start the Docker container:
+```bash
+docker run -p 5000:5000 wellnest-ecg-ai
+```
+
+It should run the API, you can then test it using the method described above.
+
+### 3. Stop Docker Container
+
+To stop the running Docker container, first list all running containers to get the container ID or name:
+```bash
+docker ps -a
+```
+Then, stop the container using its ID or name:
+```bash
+docker stop <container_id_or_name>
+```
 
